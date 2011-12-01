@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>
+			rrregex
+		</title>
+		<link rel="alternate" type="application/rss+xml" title="rss feed" href="index.rss" />
+
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+		<script type="text/javascript">   
+		function do_match() {
+			var test_string = $("#test").val();              
+					var regex_string = $("#regex").val();
+					var post_data = "test=" + test_string + "&regexp=" + regex_string;
+					$.ajax({
+					    type: 'POST',
+					    url: "match",
+					    data: encodeURI($("#rrregex").serialize()),
+					    success: function(data, textStatus, jqXHR) {   
+							resp = JSON.parse(data);
+							if (resp[0] == true) {           
+								$("#resp_match").html(resp[1]);   
+								$("#resp_captures").html(resp[2].join(', '));
+								$("#resp").css("color","green");
+							} else {
+								$("#resp").css("color","red");    
+								if (resp.length > 1) {
+									// error message, invalid regex
+									$("#resp_match").html(resp[1]);
+								} else {
+									// valid regex, just no match
+									$("#resp_match").html('');   
+									$("#resp_captures").html('');              
+								}   
+							}                  
+						} // success func
+					   }) 
+					.error(function(data, textStatus, jqXHR) { 
+						alert(data.status + ": " + data.responseText);
+					});                                       
+		}    
+		$(document).ready(function() {  
+			$("#test").keyup(function() {
+  					 do_match();
+					   return false;
+			 });   
+			$("#regex").keyup(function() {
+				do_match();      
+				return false; 
+			})
+			$("#match").click(function() { 
+				      do_match();     
+					
+				   return false;
+				});      
+			});
+		</script>
+	</head>
+	<body>
+
+			<form id="rrregex">
+				<div>
+					<label>test string:</label> 
+					<input type="text" name="test" id="test" value="asdf">  
+			   	</div>
+			    <div>
+					<label>regex:</label> 
+					<input type="text" name="regex" id="regex" value="[a-d].*">  
+			   	</div>    
+				<div>
+					<input type="button" value="match!" id="match" />
+				</div>
+			</form>  
+			                                        
+			<div id="resp">
+				<label>match:</label><div id="resp_match"></div>
+				<label>captures:</label><div id="resp_captures"></div>  
+			</div>
+	</body>
+</html>
