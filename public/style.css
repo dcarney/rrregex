@@ -1,0 +1,23 @@
+/* We want our <ol> item counter to start at 0 */
+#resp_captures ol {
+    counter-reset: item -1;
+}                     
+                             
+/* set the item value manually */
+#resp_captures li:before {
+    content: counter(item) ": ";
+    counter-increment: item;
+}
+
+/* turn off the default numbering */                            
+#resp_captures li { 
+    list-style-type: none;
+}                         
+
+.valid {
+    border: solid 3px green;
+}
+
+.invalid {
+    border: solid 3px red;
+}  
