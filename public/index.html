@@ -13,6 +13,52 @@
 		var captures_tmpl = "<ol>{{#captures}}<li>{{.}}<\/li>{{/captures}}<\/ol>"      
 		var match_tmpl = "{{match}}"
 
+		function reset() {
+			$("rrregex").each(function() { 
+				this.reset();
+			});
+
+			$("#resp").hide();
+			display_matches(null);
+			display_captures(null);
+			$("#test_str").toggleClass("success", false);
+			$("#test_str").toggleClass("error", false);
+		}
+
+		function display_captures(captures) {
+			if (captures != null && captures.length > 0)  {
+				$("#resp_captures").show();
+				$("#resp_captures span").html(Mustache.to_html(captures_tmpl, resp));  
+			}
+			else {
+				$("#resp_captures").hide();
+				$("#resp_captures span").html('');
+			}
+		}
+
+		function display_matches(matches) {
+			if (resp != null) {
+				$("#resp_match").show();
+				$("#resp_match span").html(Mustache.to_html(match_tmpl, matches))
+			}
+			else {
+				$("#resp_match span").html('');   
+			}
+		}
+
+		function display_error(error) {
+			if (error != null) {
+				// error message, invalid regex
+				$("#regex_error").html(error);
+				$("#regex_error").show();
+			}
+			else {
+				$("#regex_error").html('');
+				$("#regex_error").hide();
+			}
+			$("#regex_div").toggleClass("error", error ? true : false);
+		}
+
 		function do_match() {
 			$.ajax({
 				type: 'POST',
@@ -23,34 +69,14 @@
 					$("#test_str").toggleClass("success", resp.result);
 					$("#test_str").toggleClass("error", (!resp.result) && (!resp.error));   
 					(resp.result == true) ? $("#resp").show() : $("#resp").hide(); 
-					$("#regex_error").html('');
-					$("#regex_error").hide();
 					
+					display_captures(resp.captures);
+
 					if (resp.result == true) {        
-						// display match
-						$("#resp_match").show();
-						$("#resp_match span").html(Mustache.to_html(match_tmpl, resp))
-						// display captures
-						if (resp.captures != null && resp.captures.length > 0)  {
-							$("#resp_captures").show();
-							$("#resp_captures span").html(Mustache.to_html(captures_tmpl, resp));  
-						}
-						else
-						{
-							$("#resp_captures").hide();
-							$("#resp_captures span").html('');
-						}
+						display_matches(resp);
 					} else {
-						$("#regex_div").toggleClass("error", resp.error ? true : false);
-						if (resp.error) {
-							// error message, invalid regex
-							$("#regex_error").html(resp.error);
-							$("#regex_error").show();
-						} else {
-							// valid regex, just no match
-							$("#resp_match span").html('');   
-							$("#resp_captures span").html('');
-						}   
+						display_error(resp.error)
+						if (!resp.error) { display_matches(null); }
 					}                  
 				} // success func
 			   }) 
@@ -71,12 +97,7 @@
 				do_match(); return false; 
 			});  
 			$("#clear_all").click(function() {
-				$("rrregex").each(function() { 
-					this.reset();
-				});
-				$("#resp").hide();
-				$("#resp_match span").html('');   
-				$("#resp_captures span").html('');
+				reset();
 			});
 			$("#resp").hide();
 			$("#regex_error").hide();
@@ -98,41 +119,50 @@
 				<hr/>
 			</div>
 			<form id="rrregex" >
-					<div class="span16" style="background:#FFF">
-						<div class="row">
-							<div class="span14 offset1">
-								<h4>(ruby) regular expression:</h4>
-								<div id="regex_div" class="clearfix">
-									<span>/</span>
-									<input type="text" name="regex" id="regex" value="" class="span13" /> 
-									<span>/</span> 
-									<input type="text" name="opts" id="opts" size="4" value="" class="span1" />
-									<span id="regex_error" class="help-inline"></span>
-								</div>
-							<div>
-						</div>
-						<div class="row">
-							<div class="span7">
-								<div style="float:left;">
-									<h4>test string:</h4>
-									<div id="test_str" class="clearfix">
-										<textarea name="test" id="test" cols="50" rows="10" class="span6"></textarea>
-									</div>
-									<input id="clear_all" type="reset" value="clear all" class="btn">
-								</div>
+				<div class="span16" style="background:#FFF">
+					<div class="row">
+						<div class="span14 offset1">
+							<h4>(ruby) regular expression:</h4>
+							<div id="regex_div" class="clearfix">
+								<span>/</span>
+								<input type="text" name="regex" id="regex" value="" class="span13" /> 
+								<span>/</span> 
+								<input type="text" name="opts" id="opts" maxlength="4" value="" class="span1" />
+								<span id="regex_error" class="help-inline"></span>
 							</div>
-							<div id="resp" class="span7">
-								<h4>result:</h4>
-								<div id="resp_match" class="alert-message success">
-										<h4>match:</h4><span><span>
+						<div>
+					</div>
+					<div class="row">
+						<div class="span7">
+							<div style="float:left;">
+								<h4>test string:</h4>
+								<div id="test_str" class="clearfix">
+									<textarea name="test" id="test" cols="50" rows="10" class="span6"></textarea>
 								</div>
-								<div id="resp_captures" class="alert-message success">
-										<h4>captures:</h4><span><span>
-								</div>
+								<input id="clear_all" type="reset" value="clear all" class="btn">
+							</div>
+						</div>
+						<div id="resp" class="span7">
+							<h4>results:</h4>
+							<div id="resp_match" class="alert-message success">
+								<h4>match:</h4><span><span>
+							</div>
+							<div id="resp_captures" class="alert-message success">
+								<h4>captures:</h4><span><span>
 							</div>
 						</div>
 					</div>
-			
+					<div class="row">
+						<div class="footnote">
+							<h5>
+							Checkout <a href="https://github.com/dcarney/rrregex">the code</a> 
+							on <a href="http://www.github.com">github</a>, or a Ruby regex reference 
+							on <a href="http://www.ruby-doc.org/core-1.9.3/Regexp.html">ruby-doc</a>.
+							Inspiration from <a href="http://rubular.com/">Rubular</a>.
+							</h5>
+						</div>
+					</div>
+				</div>
 			</form>
 		</div>
 	</body>

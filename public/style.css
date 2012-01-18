@@ -15,14 +15,8 @@
     color: #FFF;
 }                         
 
-.valid {
-    border: solid 3px green;
-}
-
-.invalid {
-    border: solid 3px red;
-}  
-
-.shaded {
-	background: #DDD;
+.footnote {
+	margin-left: auto; 
+	margin-right: auto; 
+	text-align:center;"
 }
