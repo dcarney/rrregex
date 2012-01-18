@@ -12,6 +12,7 @@
 /* turn off the default numbering */                            
 #resp_captures li { 
     list-style-type: none;
+    color: #FFF;
 }                         
 
 .valid {
@@ -21,3 +22,7 @@
 .invalid {
     border: solid 3px red;
 }  
+
+.shaded {
+	background: #DDD;
+}

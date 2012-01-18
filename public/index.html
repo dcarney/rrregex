@@ -7,10 +7,12 @@
 		<link rel="stylesheet" href="style.css" type="text/css" media="screen" title="no title" charset="utf-8"></link>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
 		<script src="mustache.js" type="text/javascript" charset="utf-8"></script>
+		<link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css">
 		<script type="text/javascript">
 //<![CDATA[
-		var captures_tmpl = "<span>captures:</span> <ol>{{#captures}}<li>{{.}}<\/li>{{/captures}}<\/ol>"      
-		var match_tmpl = "<span>match:</span>{{match}}"
+		var captures_tmpl = "<ol>{{#captures}}<li>{{.}}<\/li>{{/captures}}<\/ol>"      
+		var match_tmpl = "{{match}}"
+
 		function do_match() {
 			$.ajax({
 				type: 'POST',
@@ -18,24 +20,36 @@
 				data: encodeURI($("#rrregex").serialize()),
 				success: function(data, textStatus, jqXHR) {   
 					resp = JSON.parse(data);  
-					$("#test").toggleClass("valid", resp.result);
-					$("#test").toggleClass("invalid", !resp.result);   
+					$("#test_str").toggleClass("success", resp.result);
+					$("#test_str").toggleClass("error", (!resp.result) && (!resp.error));   
+					(resp.result == true) ? $("#resp").show() : $("#resp").hide(); 
+					$("#regex_error").html('');
+					$("#regex_error").hide();
 					
-					if (resp.result == true) {           
+					if (resp.result == true) {        
 						// display match
-						$("#resp_match").html(Mustache.to_html(match_tmpl, resp))
+						$("#resp_match").show();
+						$("#resp_match span").html(Mustache.to_html(match_tmpl, resp))
 						// display captures
 						if (resp.captures != null && resp.captures.length > 0)  {
-							$("#resp_captures").html(Mustache.to_html(captures_tmpl, resp));  
+							$("#resp_captures").show();
+							$("#resp_captures span").html(Mustache.to_html(captures_tmpl, resp));  
+						}
+						else
+						{
+							$("#resp_captures").hide();
+							$("#resp_captures span").html('');
 						}
 					} else {
+						$("#regex_div").toggleClass("error", resp.error ? true : false);
 						if (resp.error) {
 							// error message, invalid regex
-							$("#resp_match").html(resp.error);
+							$("#regex_error").html(resp.error);
+							$("#regex_error").show();
 						} else {
 							// valid regex, just no match
-							$("#resp_match").html('');   
-							$("#resp_captures").html('');              
+							$("#resp_match span").html('');   
+							$("#resp_captures span").html('');
 						}   
 					}                  
 				} // success func
@@ -56,31 +70,70 @@
 			$("#opts").keyup(function() {
 				do_match(); return false; 
 			});  
+			$("#clear_all").click(function() {
+				$("rrregex").each(function() { 
+					this.reset();
+				});
+				$("#resp").hide();
+				$("#resp_match span").html('');   
+				$("#resp_captures span").html('');
+			});
+			$("#resp").hide();
+			$("#regex_error").hide();
 		});
 		//]]>
 		</script>
 	</head>
-	<body>
-		<form id="rrregex">
-			<span>(ruby) regular expression:</span>
-			<div>
-				<span>/ </span>
-				<input type="text" name="regex" id="regex" value="[a-d].*" size="100" /> 
-				<span>/</span> 
-				<input type="text" name="opts" id="opts" size="4" value="" />
+	<body style="background:#6D6E71">
+		<div class="container">
+			<div class="row">
+				<h1>
+					rrregex
+					<small>
+						<strong><em>r</em></strong>ealtime
+						<strong><em>r</em></strong>uby
+						<strong><em>r</em></strong>egex
+					</small>
+				<h1>
+				<hr/>
 			</div>
-			<br />
-			<div style="float:left;">
-				<span>test string:</span>
-				<div>
-					<textarea name="test" id="test" cols="50" rows="10" style="outline:none;"></textarea>
-				</div>
-			</div>
-			<div id="resp" style="float:left;">
-			   
-				<div id="resp_match"></div>
-				<div id="resp_captures"></div>
-			</div>
-		</form>
+			<form id="rrregex" >
+					<div class="span16" style="background:#FFF">
+						<div class="row">
+							<div class="span14 offset1">
+								<h4>(ruby) regular expression:</h4>
+								<div id="regex_div" class="clearfix">
+									<span>/</span>
+									<input type="text" name="regex" id="regex" value="" class="span13" /> 
+									<span>/</span> 
+									<input type="text" name="opts" id="opts" size="4" value="" class="span1" />
+									<span id="regex_error" class="help-inline"></span>
+								</div>
+							<div>
+						</div>
+						<div class="row">
+							<div class="span7">
+								<div style="float:left;">
+									<h4>test string:</h4>
+									<div id="test_str" class="clearfix">
+										<textarea name="test" id="test" cols="50" rows="10" class="span6"></textarea>
+									</div>
+									<input id="clear_all" type="reset" value="clear all" class="btn">
+								</div>
+							</div>
+							<div id="resp" class="span7">
+								<h4>result:</h4>
+								<div id="resp_match" class="alert-message success">
+										<h4>match:</h4><span><span>
+								</div>
+								<div id="resp_captures" class="alert-message success">
+										<h4>captures:</h4><span><span>
+								</div>
+							</div>
+						</div>
+					</div>
+			
+			</form>
+		</div>
 	</body>
 </html>
