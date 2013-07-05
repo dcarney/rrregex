@@ -10,11 +10,11 @@
 		<link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css">
 		<script type="text/javascript">
 //<![CDATA[
-		var captures_tmpl = "<ol>{{#captures}}<li>{{.}}<\/li>{{/captures}}<\/ol>"      
+		var captures_tmpl = "<ol>{{#captures}}<li>{{.}}<\/li>{{/captures}}<\/ol>"
 		var match_tmpl = "{{match}}"
 
 		function reset() {
-			$("rrregex").each(function() { 
+			$("rrregex").each(function() {
 				this.reset();
 			});
 
@@ -26,13 +26,15 @@
 		}
 
 		function display_captures(captures) {
+      $("#resp_captures span").html('');
 			if (captures != null && captures.length > 0)  {
-				$("#resp_captures").show();
-				$("#resp_captures span").html(Mustache.to_html(captures_tmpl, resp));  
+        $("#resp_captures").show();
+        $.each(captures, function(k,v){
+            $("#resp_captures span").append(Mustache.to_html(captures_tmpl, {captures: v}));
+           });
 			}
 			else {
 				$("#resp_captures").hide();
-				$("#resp_captures span").html('');
 			}
 		}
 
@@ -42,7 +44,7 @@
 				$("#resp_match span").html(Mustache.to_html(match_tmpl, matches))
 			}
 			else {
-				$("#resp_match span").html('');   
+				$("#resp_match span").html('');
 			}
 		}
 
@@ -64,38 +66,38 @@
 				type: 'POST',
 				url: "match",
 				data: encodeURI($("#rrregex").serialize()),
-				success: function(data, textStatus, jqXHR) {   
-					resp = JSON.parse(data);  
+				success: function(data, textStatus, jqXHR) {
+					resp = JSON.parse(data);
 					$("#test_str").toggleClass("success", resp.result);
-					$("#test_str").toggleClass("error", (!resp.result) && (!resp.error));   
-					(resp.result == true) ? $("#resp").show() : $("#resp").hide(); 
-					
+					$("#test_str").toggleClass("error", (!resp.result) && (!resp.error));
+					(resp.result == true) ? $("#resp").show() : $("#resp").hide();
+
 					display_captures(resp.captures);
 
-					if (resp.result == true) {        
+					if (resp.result == true) {
 						display_matches(resp);
 					} else {
 						display_error(resp.error)
 						if (!resp.error) { display_matches(null); }
-					}                  
+					}
 				} // success func
-			   }) 
-			.error(function(data, textStatus, jqXHR) { 
+			   })
+			.error(function(data, textStatus, jqXHR) {
 				alert(data.status + ": " + data.responseText);
-			});                                       
-		}          
-		
+			});
+		}
+
 		// setup keyboard handlers on all the necessary UI elements
-		$(document).ready(function() {  
+		$(document).ready(function() {
 			$("#test").keyup(function() {
 				do_match(); return false;
-			 });   
+			 });
 			$("#regex").keyup(function() {
-				do_match(); return false; 
+				do_match(); return false;
 			});
 			$("#opts").keyup(function() {
-				do_match(); return false; 
-			});  
+				do_match(); return false;
+			});
 			$("#clear_all").click(function() {
 				reset();
 			});
@@ -125,8 +127,8 @@
 							<h4>(ruby) regular expression:</h4>
 							<div id="regex_div" class="clearfix">
 								<span>/</span>
-								<input type="text" name="regex" id="regex" value="" class="span13" /> 
-								<span>/</span> 
+								<input type="text" name="regex" id="regex" value="" class="span13" />
+								<span>/</span>
 								<input type="text" name="opts" id="opts" maxlength="4" value="" class="span1" />
 								<span id="regex_error" class="help-inline"></span>
 							</div>
@@ -155,8 +157,8 @@
 					<div class="row">
 						<div class="footnote">
 							<h5>
-							Checkout <a href="https://github.com/dcarney/rrregex">the code</a> 
-							on <a href="http://www.github.com">github</a>, or a Ruby regex reference 
+							Checkout <a href="https://github.com/dcarney/rrregex">the code</a>
+							on <a href="http://www.github.com">github</a>, or a Ruby regex reference
 							on <a href="http://www.ruby-doc.org/core-1.9.3/Regexp.html">ruby-doc</a>.
 							Inspiration from <a href="http://rubular.com/">Rubular</a>.
 							</h5>

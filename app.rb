@@ -18,7 +18,7 @@ post '/match' do
     opts = params['opts'].split(//).map{ |c| OPTMAP[c] }.reduce{ |x, n| x | n }
     regexp = Regexp.new "#{params['regex']}"
     match = regexp.match(params['test'])
-    
+
     if match
       { :result => true, :match => match.to_s, :captures => params['test'].scan(regexp) }.to_json
     else
