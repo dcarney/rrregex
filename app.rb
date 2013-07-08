@@ -16,9 +16,11 @@ post '/match' do
   params.each{ |k,v| params[k] = CGI::unescape(v)}
   begin
     opts = params['opts'].split(//).map{ |c| OPTMAP[c] }.reduce{ |x, n| x | n }
-    match = Regexp.new("#{params['regex']}", opts).match(params['test'])
+    regexp = Regexp.new "#{params['regex']}"
+    match = regexp.match(params['test'])
+
     if match
-      { :result => true, :match => match.to_s, :captures => match.captures }.to_json
+      { :result => true, :match => match.to_s, :captures => params['test'].scan(regexp) }.to_json
     else
       { :result => false}.to_json
     end
