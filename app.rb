@@ -13,6 +13,8 @@ get '/' do
 end
 
 post '/match' do
+  return { :result => false}.to_json if empty_fields? ['regex','test']
+
   params.each{ |k,v| params[k] = CGI::unescape(v)}
   begin
     opts = params['opts'].split(//).map{ |c| OPTMAP[c] }.reduce{ |x, n| x | n }
@@ -26,5 +28,15 @@ post '/match' do
     end
   rescue RegexpError => ex
     { :result => false, :error => ex.message}.to_json
+  end
+end
+
+helpers do
+  def empty_fields? fields
+    fields.each do |field|
+      return true if params[field].to_s.empty?
+    end
+
+    false
   end
 end
